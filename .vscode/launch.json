@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "operation/build.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/operation/build.py",
+            "args": [
+                "-d",
+                "ubuntu",
+                "-v",
+                "24.04",
+                "--test-full"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
