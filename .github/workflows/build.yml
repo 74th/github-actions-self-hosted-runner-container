@@ -49,7 +49,7 @@ jobs:
 
       - name: Create tag
         id: create_tag
-        run: -|
+        run: |-
           IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.distro }}-${{ matrix.arch }}
           TAG=${IMAGE}:${{ matrix.tag }}
           LATEST_TAG=${IMAGE}:latest
