@@ -27,8 +27,8 @@ jobs:
           - debian
         include:
           - distro: debian
-            distro_version: bookwarm-slim
-            tag: bookwarm-slim
+            distro_version: bookworm-slim
+            tag: bookworm-slim
             latest: true
     steps:
       - name: Checkout repository
