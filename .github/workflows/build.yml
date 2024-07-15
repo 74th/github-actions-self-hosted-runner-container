@@ -32,11 +32,11 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v6
         with:
+          context: .
           registry: docker.pkg.github.com
+          file: ./image/${{ matrix.distro }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           build-args: -|
             DISTRO_VERSION=${{ matrix.distro_version }}
-          dockerfile: ./image/${{ matrix.distro }}/Dockerfile
-          context: .
-          tags: 74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
+          tags: docker.pkg.github.com/74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
           labels: ${{ matrix.distro_version }}
