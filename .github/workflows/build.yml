@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  packages: write
+
+
 jobs:
   build:
     name: build
@@ -35,7 +39,7 @@ jobs:
           context: .
           file: ./image/${{ matrix.distro }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
-          build-args: -|
+          build-args: |
             DISTRO_VERSION=${{ matrix.distro_version }}
           tags: docker.pkg.github.com/74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
           labels: ${{ matrix.distro_version }}
