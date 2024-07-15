@@ -30,7 +30,7 @@ jobs:
             distro_version: buster-slim
             tags: buster-slim
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Set up QEMU
