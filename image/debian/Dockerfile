@@ -1,5 +1,5 @@
 ARG DISTRO_VERSION=24.04
-FROM ubuntu:${DISTRO_VERSION}
+FROM debian:${DISTRO_VERSION}
 
 RUN groupadd -g 999 user && \
     useradd -m -g 999 user && \

@@ -1,11 +1,12 @@
 #!/bin/bash
 set -xe
-if [ "$(uname -p)" = "aarch64" ]; then
+UNAME_ARCH=$(uname -m)
+if [ "${UNAME_ARCH}" = "aarch64" ]; then
     ARCH="arm64"
-elif [ "$(uname -p)" = "x86_64" ]; then
+elif [ "${UNAME_ARCH}" = "x86_64" ]; then
     ARCH="amd64"
 else
-    echo "Unsupported architecture"
+    echo "Unsupported architecture: ${UNAME_ARCH}"
     exit 1
 fi
 

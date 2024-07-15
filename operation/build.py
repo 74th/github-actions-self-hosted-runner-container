@@ -1,7 +1,8 @@
 #!env python3
 from dataclasses import dataclass
 import time
-import urllib3
+import github
+import requests
 import uuid
 import signal
 import os
@@ -24,34 +25,35 @@ def get_image_tag(distro: str, distro_version: str) -> str:
     return f"github-actions-self-hosted-runner-{distro}:{distro_version}"
 
 
-def build_container(distro: str, distro_version: str, engine: str):
-    print(f"start distro:{distro} distro_version:{distro_version}")
+def build_container(distro: str, distro_version: str, engine: str) -> bool:
+    print(f"[build]", "start distro:{distro} distro_version:{distro_version}")
 
     os.chdir(ROOT_DIR)
 
     tag = get_image_tag(distro, distro_version)
     dockerfile = ROOT_DIR / "image" / distro / "Dockerfile"
 
-    cmd = [engine, "build", "-f", dockerfile, "-t", tag, ROOT_DIR]
-    print(shlex.join(map(str, cmd)))
+    cmd = [
+        engine,
+        "build",
+        "-f",
+        dockerfile,
+        "-t",
+        tag,
+        ROOT_DIR,
+        "--build-arg",
+        f"DISTRO_VERSION={distro_version}",
+    ]
+    print("[build]", shlex.join(map(str, cmd)))
 
-    subprocess.run(cmd)
+    result = subprocess.run(cmd)
 
+    if result.returncode == 0:
+        print("[build]", "build successed")
+        return True
 
-def _get_github_runners(repo_owner: str, repo_name: str, access_token: str) -> list[Runner]:
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/actions/runners"
-    headers = {
-        "Authorization": f"token {access_token}",
-        "Accept": "application/vnd.github.v3+json",
-    }
-    res = urllib3.request("GET", url, headers=headers)
-    if res.status == 200:
-        res_body = res.json()
-        return list(map(lambda x: Runner(x["name"], x["status"]), res_body["runners"]))
-    else:
-        raise Exception(f"failed to get runners: {res.status}")
-
-
+    print("[build]", "build filed")
+    return False
 
 
 def test_run_container(
@@ -67,7 +69,7 @@ def test_run_container(
         print("ACCESS_TOKEN is required")
         sys.exit(1)
 
-    print("[test] start test run")
+    print("[test]", "start test run")
 
     runner_name = "test-" + uuid.uuid4().hex[:8]
     tag = get_image_tag(distro, distro_version)
@@ -101,46 +103,49 @@ def test_run_container(
     signal.signal(signal.SIGTERM,receive_signal)
 
     if check:
+        cl = github.Github(auth=github.Auth.Token(access_token))
+        repo_api = cl.get_repo(f"{repo_owner}/{repo_name}")
+
         try:
             time.sleep(5)
 
             if p.returncode is not None:
-                print(f"[test] exit code: {p.returncode}")
+                print("[test]", f"exit code: {p.returncode}")
                 sys.exit(1)
 
             for _ in range(10):
                 if p.returncode is not None:
-                    print(f"[test] stopped container detected: {p.returncode}")
+                    print("[test]", f"stopped container detected: {p.returncode}")
                     return False
 
-                print("[test] check runner...")
+                print("[test]", "check runner...")
 
-                runners = _get_github_runners(repo_owner, repo_name, access_token)
+                runners = repo_api.get_self_hosted_runners()
 
                 for runner in runners:
                     if runner.name == runner_name:
-                        print(f"[test] runner {runner_name} found, status: {runner.status}")
+                        print("[test]", f"runner {runner_name} found, status: {runner.status}")
                         if runner.status == "online":
-                            print("[test] online runner found")
+                            print("[test]", "online runner found")
                             return True
 
                 time.sleep(3)
 
             else:
-                print("[test] online runner not found")
+                print("[test]", "online runner not found")
                 return False
 
         finally:
             if p.returncode is None:
-                print("[test] stop container")
+                print("[test]", "stop container")
                 subprocess.run([engine, "stop", runner_name])
 
     else:
         p.wait()
 
-        print(f"exit code:{p.returncode}")
+        print("[test]", f"exit code:{p.returncode}")
 
-    print("[test] test result: ", "success" if p.returncode == 0 else "failed")
+    print("[test]", "test result: ", "success" if p.returncode == 0 else "failed")
     return True
 
 
@@ -178,7 +183,9 @@ def main() -> None:
         print("supported distributions: " + ", ".join(SUPPORT_DISTROS))
         sys.exit(1)
 
-    build_container(distro, distro_version, engine)
+    ok = build_container(distro, distro_version, engine)
+    if not ok:
+        sys.exit(1)
 
     if is_run_test:
         ok = test_run_container(distro, distro_version, engine, repo_owner, repo_name, is_test_check)
