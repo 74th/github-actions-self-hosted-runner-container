@@ -27,8 +27,9 @@ jobs:
           - debian
         include:
           - distro: debian
-            distro_version: buster-slim
-            tags: buster-slim
+            distro_version: bookwarm-slim
+            tag: bookwarm-slim
+            latest: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -46,6 +47,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create tag
+        id: create_tag
+        run: -|
+          IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.distro }}-${{ matrix.arch }}
+          TAG=${IMAGE}:${{ matrix.tag }}
+          LATEST_TAG=${IMAGE}:latest
+          if [ "${{ matrix.latest }}" = "true" ]; then
+            echo "tags=${TAG}:${LATEST_TAG}" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${TAG}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and push Docker images
         id: push
         uses: docker/build-push-action@v6
@@ -55,13 +68,12 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           build-args: |
             DISTRO_VERSION=${{ matrix.distro_version }}
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.distro }}
-          labels: ${{ matrix.distro_version }}
-          push: true
+          tags: ${{ steps.create_tag.outputs.tags }}
+          # push: true
 
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ghcr.io/${{ github.repository }}/${{ matrix.distro }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+      # - name: Generate artifact attestation
+      #   uses: actions/attest-build-provenance@v1
+      #   with:
+      #     subject-name: ghcr.io/${{ github.repository }}/${{ matrix.distro }}:${{ matrix.tag }}-${{ matrix.arch }}
+      #     subject-digest: ${{ steps.push.outputs.digest }}
+      #     push-to-registry: true
