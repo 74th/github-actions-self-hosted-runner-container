@@ -25,11 +25,23 @@ jobs:
           - arm64
         distro:
           - debian
+          - ubuntu
         include:
+          - distro: debian
+            distro_version: buster-slim
+            tag: buster-slim
           - distro: debian
             distro_version: bookworm-slim
             tag: bookworm-slim
             latest: true
+          - distro: ubuntu
+            distro_version: "24.04"
+            tag: "24.04"
+            latest: true
+          - distro: ubuntu
+            distro_version: "22.04"
+            tag: "22.04"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
