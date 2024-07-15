@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.15.4
+          ports:
+            - containerPort: 8080
+        - name: actions-runner
+          image: ghcr.io/74th/github-actions-self-hosted-runner-container/debian-arm64:latest
+          envFrom:
+            - secretRef:
+                name: access-token-env
+          env:
+            - name: OWNER
+              value: 74th
+            - name: REPO
+              value: github-actions-self-hosted-runner-container

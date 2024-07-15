@@ -1,0 +1,6 @@
+resources:
+  - deploy.yml
+secretGenerator:
+  - name: access-token-env
+    files:
+      - secret/access-token.env

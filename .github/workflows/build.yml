@@ -28,12 +28,12 @@ jobs:
           - ubuntu
         include:
           - distro: debian
-            distro_version: buster-slim
-            tag: buster-slim
-          - distro: debian
             distro_version: bookworm-slim
             tag: bookworm-slim
             latest: true
+          - distro: debian
+            distro_version: buster-slim
+            tag: buster-slim
           - distro: ubuntu
             distro_version: "24.04"
             tag: "24.04"
