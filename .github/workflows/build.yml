@@ -54,7 +54,7 @@ jobs:
           TAG=${IMAGE}:${{ matrix.tag }}
           LATEST_TAG=${IMAGE}:latest
 
-          echo "single_tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "image=${IMAGE}" >> $GITHUB_OUTPUT
           if [ "${{ matrix.latest }}" == "true" ]; then
             echo "tags=${TAG},${LATEST_TAG}" >> $GITHUB_OUTPUT
           else
@@ -76,6 +76,6 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ steps.create_tag.outputs.single_tag }}
+          subject-name: ${{ steps.create_tag.outputs.image }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
