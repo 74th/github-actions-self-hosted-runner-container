@@ -138,7 +138,7 @@ def test_run_container(
                 print("[test]", f"exit code: {p.returncode}")
                 sys.exit(1)
 
-            for _ in range(10):
+            for _ in range(30):
                 try:
                     p.wait(timeout=3)
                     print("[test]", f"stopped container detected: {p.returncode}")
