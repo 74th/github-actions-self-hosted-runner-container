@@ -46,7 +46,7 @@ To use it, you need a GitHub Personal Access Token. Please activate and create t
 - workflow
 - admin:org
 
-The script [run_runner.sh](. /scripts/run_runner.sh) requires the following environment variables. Please enter these environment variables and start the container.
+The script [run_runner.sh](./scripts/run_runner.sh) requires the following environment variables. Please enter these environment variables and start the container.
 
 | name                      | required | description                           | runner config.sh flag | example                                       |
 | ------------------------- | -------- | ------------------------------------- | --------------------- | --------------------------------------------- |
