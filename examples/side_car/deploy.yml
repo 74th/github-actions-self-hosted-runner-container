@@ -23,7 +23,7 @@ spec:
             - secretRef:
                 name: access-token-env
           env:
-            - name: OWNER
+            - name: RUNNER_OWNER
               value: 74th
-            - name: REPO
+            - name: RUNNER_REPO
               value: github-actions-self-hosted-runner-container

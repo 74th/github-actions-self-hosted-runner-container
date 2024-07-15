@@ -36,12 +36,12 @@ def test_add_scripts() -> None:
         "--rm",
         "-i",
         "-e",
-        F"ACCESS_TOKEN={ACCESS_TOKEN}",
+        F"RUNNER_ACCESS_TOKEN={ACCESS_TOKEN}",
         "-e",
-        "OWNER=74th",
+        "RUNNER_OWNER=74th",
         "-e",
         "RUNNER_NAME=example-add-script",
-        "REPO=github-actions-self-hosted-runner-container",
+        "RUNNER_REPO=github-actions-self-hosted-runner-container",
         tag]
     print_cmd(cmd)
     subprocess.run(cmd, cwd=str(cwd), check=True)
@@ -68,11 +68,13 @@ def test_as_base_image() -> None:
         "--rm",
         "-i",
         "-e",
-        F"ACCESS_TOKEN={ACCESS_TOKEN}",
+        F"RUNNER_ACCESS_TOKEN={ACCESS_TOKEN}",
         "-e",
-        "OWNER=74th",
+        "RUNNER_OWNER=74th",
         "-e",
-        "REPO=github-actions-self-hosted-runner-container",
+        "RUNNER_REPO=github-actions-self-hosted-runner-container",
+        "-e",
+        "RUNNER_NAME=example-as-base-image",
         tag]
     print_cmd(cmd)
     subprocess.run(cmd, cwd=str(cwd), check=True)
