@@ -33,7 +33,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          registry: docker.pkg.github.com
           file: ./image/${{ matrix.distro }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           build-args: -|
