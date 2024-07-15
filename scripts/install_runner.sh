@@ -4,7 +4,7 @@ UNAME_ARCH=$(uname -m)
 if [ "${UNAME_ARCH}" = "aarch64" ]; then
     ARCH="arm64"
 elif [ "${UNAME_ARCH}" = "x86_64" ]; then
-    ARCH="amd64"
+    ARCH="x64"
 else
     echo "Unsupported architecture: ${UNAME_ARCH}"
     exit 1

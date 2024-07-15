@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 import time
 import github
-import requests
 import uuid
 import signal
 import os
@@ -15,27 +14,49 @@ import argparse
 SUPPORT_DISTROS = ["ubuntu", "debian"]
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
+
 @dataclass
 class Runner:
     name: str
     status: str
 
 
-def get_image_tag(distro: str, distro_version: str) -> str:
-    return f"github-actions-self-hosted-runner-{distro}:{distro_version}"
+def get_image_tag(distro: str, distro_version: str, arch: str | None) -> str:
+    tag = f"github-actions-self-hosted-runner-{distro}:{distro_version}"
+    if arch:
+        tag += f"-{arch}"
+    return tag
 
 
-def build_container(distro: str, distro_version: str, engine: str) -> bool:
-    print(f"[build]", "start distro:{distro} distro_version:{distro_version}")
+def get_docker_platform_from_arch(arch: str | None) -> str:
+    if arch in ["x64", "amd64", "x86_64"]:
+        return "linux/amd64"
+    if arch in ["arm64", "aarch64"]:
+        return "linux/arm64"
+    else:
+        print(f"unknown architecture:{arch}")
+        print("supported architectures: x64, arm64")
+        sys.exit(1)
+
+
+def build_container(
+    distro: str, distro_version: str, engine: str, arch: str | None
+) -> bool:
+    print("[build]", f"start distro:{distro} distro_version:{distro_version}")
 
     os.chdir(ROOT_DIR)
 
-    tag = get_image_tag(distro, distro_version)
+    tag = get_image_tag(distro, distro_version, arch)
     dockerfile = ROOT_DIR / "image" / distro / "Dockerfile"
 
-    cmd = [
-        engine,
-        "build",
+    if engine == "docker":
+        cmd = ["docker", "buildx", "build", "--output=type=docker"]
+    else:
+        cmd = [engine, "build"]
+    if arch:
+        cmd += ["--platform", get_docker_platform_from_arch(arch)]
+
+    cmd += [
         "-f",
         dockerfile,
         "-t",
@@ -60,6 +81,7 @@ def test_run_container(
     distro: str,
     distro_version: str,
     engine: str,
+    arch: str | None,
     repo_owner: str,
     repo_name: str,
     check: bool = False,
@@ -72,11 +94,14 @@ def test_run_container(
     print("[test]", "start test run")
 
     runner_name = "test-" + uuid.uuid4().hex[:8]
-    tag = get_image_tag(distro, distro_version)
+    tag = get_image_tag(distro, distro_version, arch)
 
-    cmd = [
-        engine,
-        "run",
+    cmd = [engine, "run"]
+
+    if arch:
+        cmd += ["--platform", get_docker_platform_from_arch(arch)]
+
+    cmd += [
         "-i",
         "--rm",
         "--name",
@@ -100,7 +125,7 @@ def test_run_container(
         p.send_signal(signal.SIGINT)
 
     signal.signal(signal.SIGINT, receive_signal)
-    signal.signal(signal.SIGTERM,receive_signal)
+    signal.signal(signal.SIGTERM, receive_signal)
 
     if check:
         cl = github.Github(auth=github.Auth.Token(access_token))
@@ -114,9 +139,12 @@ def test_run_container(
                 sys.exit(1)
 
             for _ in range(10):
-                if p.returncode is not None:
+                try:
+                    p.wait(timeout=3)
                     print("[test]", f"stopped container detected: {p.returncode}")
                     return False
+                except subprocess.TimeoutExpired:
+                    pass
 
                 print("[test]", "check runner...")
 
@@ -124,19 +152,22 @@ def test_run_container(
 
                 for runner in runners:
                     if runner.name == runner_name:
-                        print("[test]", f"runner {runner_name} found, status: {runner.status}")
+                        print(
+                            "[test]",
+                            f"runner {runner_name} found, status: {runner.status}",
+                        )
                         if runner.status == "online":
                             print("[test]", "online runner found")
                             return True
-
-                time.sleep(3)
 
             else:
                 print("[test]", "online runner not found")
                 return False
 
         finally:
-            if p.returncode is None:
+            try:
+                p.wait(timeout=0.1)
+            except subprocess.TimeoutExpired:
                 print("[test]", "stop container")
                 subprocess.run([engine, "stop", runner_name])
 
@@ -152,6 +183,7 @@ def test_run_container(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--engine", default="docker", help="container engine")
+    parser.add_argument("-a", "--arch", help="architecture [amd64, x64]")
     parser.add_argument("-d", "--distro", required=True, help="linux distribution name")
     parser.add_argument("-o", "--owner", default="74th", help="repository owner")
     parser.add_argument(
@@ -168,6 +200,7 @@ def main() -> None:
     args = parser.parse_args()
 
     engine = args.engine
+    arch = args.arch
     distro = args.distro
     repo_owner = args.owner
     repo_name = args.repo
@@ -183,12 +216,25 @@ def main() -> None:
         print("supported distributions: " + ", ".join(SUPPORT_DISTROS))
         sys.exit(1)
 
-    ok = build_container(distro, distro_version, engine)
+    ok = build_container(
+        distro=distro,
+        distro_version=distro_version,
+        engine=engine,
+        arch=arch,
+    )
     if not ok:
         sys.exit(1)
 
     if is_run_test:
-        ok = test_run_container(distro, distro_version, engine, repo_owner, repo_name, is_test_check)
+        ok = test_run_container(
+            distro=distro,
+            distro_version=distro_version,
+            engine=engine,
+            arch=arch,
+            repo_owner=repo_owner,
+            repo_name=repo_name,
+            check=is_test_check,
+        )
         sys.exit(0 if ok else 1)
 
 
