@@ -1,4 +1,4 @@
-ARG DISTRO_VERSION=24.04
+ARG DISTRO_VERSION=bookworm-slim
 FROM debian:${DISTRO_VERSION}
 
 RUN groupadd -g 999 user && \
