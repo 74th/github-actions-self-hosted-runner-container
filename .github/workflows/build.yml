@@ -14,10 +14,12 @@ jobs:
         arch:
           - amd64
           - arm64
+        distro:
+          - debian
         include:
           - distro: debian
             distro_version: bookworm-slim
-            tags: bookworm-slim,latest
+            tags: bookworm-slim
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -36,5 +38,5 @@ jobs:
             DISTRO_VERSION=${{ matrix.distro_version }}
           dockerfile: ./image/${{ matrix.distro }}/Dockerfile
           context: .
-          repository: 74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
-          tags: ${{ matrix.distro_version }}
+          tags: 74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
+          labels: ${{ matrix.distro_version }}
