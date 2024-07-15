@@ -42,7 +42,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
-          registry: docker.pkg.github.com/
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -55,13 +55,13 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           build-args: |
             DISTRO_VERSION=${{ matrix.distro_version }}
-          tags: docker.pkg.github.com/74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
+          tags: ghcr.io/${{ github.repository }}/${{ matrix.distro }}
           labels: ${{ matrix.distro_version }}
           push: true
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: docker.pkg.github.com/74th/github-actions-self-hosted-runner-container/${{ matrix.distro }}
+          subject-name: ghcr.io/${{ github.repository }}/${{ matrix.distro }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
