@@ -53,7 +53,7 @@ jobs:
           IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.distro }}-${{ matrix.arch }}
           TAG=${IMAGE}:${{ matrix.tag }}
           LATEST_TAG=${IMAGE}:latest
-          if [ "${{ matrix.latest }}" = "true" ]; then
+          if [ "${{ matrix.latest }}" == "true" ]; then
             echo "tags=${TAG}:${LATEST_TAG}" >> $GITHUB_OUTPUT
           else
             echo "tags=${TAG}" >> $GITHUB_OUTPUT
