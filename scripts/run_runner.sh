@@ -4,7 +4,7 @@ set -xe
 env
 
 if [ -z "${RUNNER_ACCESS_TOKEN}" ]; then
-    echo "RUNNER_ACCESS_TOKEN is not set. Please set the ACCESS_TOKEN environment variable."
+    echo "RUNNER_ACCESS_TOKEN is not set. Please set the RUNNER_ACCESS_TOKEN environment variable."
     exit 1
 fi
 if [ -z "${RUNNER_OWNER}" ]; then
