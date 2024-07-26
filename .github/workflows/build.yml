@@ -81,10 +81,3 @@ jobs:
             base_image=${{ matrix.pt.base_image }}
           tags: ${{ steps.create_tag.outputs.tags }}
           push: true
-
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ steps.create_tag.outputs.image }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
