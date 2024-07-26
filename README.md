@@ -46,25 +46,15 @@ The script [run_runner.sh](./scripts/run_runner.sh) requires the following envir
 ## Image URL
 
 - debian:bookworm-slim
-  - amd64:
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian-amd64:bookworm-slim`
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian-amd64:latest`
-  - arm64:
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian-arm64:bookworm-slim`
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian-arm64:latest`
+  - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian:latest`
+  - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian:bookworm-slim`
 - debian:buster-slim
-  - amd64: `ghcr.io/74th/github-actions-self-hosted-runner-container/debian-amd64:bookworm-slim`
-  - arm64: `ghcr.io/74th/github-actions-self-hosted-runner-container/debian-arm64:bookworm-slim`
+  - `ghcr.io/74th/github-actions-self-hosted-runner-container/debian:bookworm-slim`
 - ubuntu:24.04
-  - amd64:
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu-amd64:24.04`
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu-amd64:latest`
-  - arm64:
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu-arm64:24.04`
-    - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu-arm64:latest`
+  - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu:24.04`
+  - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu:latest`
 - ubuntu:22.04
-  - amd64: `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu-amd64:22.04`
-  - arm64: `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu-arm64:22.04`
+  - `ghcr.io/74th/github-actions-self-hosted-runner-container/ubuntu:22.04`
 
 ## scripts URL
 
@@ -118,7 +108,7 @@ spec:
           ports:
             - containerPort: 8080
         - name: actions-runner
-          image: ghcr.io/74th/github-actions-self-hosted-runner-container/debian-arm64:latest
+          image: ghcr.io/74th/github-actions-self-hosted-runner-container/debian:latest
           envFrom:
             - secretRef:
                 name: access-token-env
