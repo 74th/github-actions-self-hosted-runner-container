@@ -19,9 +19,6 @@ jobs:
 
     strategy:
       matrix:
-        arch:
-          - amd64
-          - arm64
         pt:
           - distro: debian
             base_image: bookworm-slim
@@ -62,7 +59,7 @@ jobs:
       - name: Create tag
         id: create_tag
         run: |-
-          IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.pt.image }}-${{ matrix.arch }}
+          IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.pt.image }}
           TAG=${IMAGE}:${{ matrix.pt.tag }}
           LATEST_TAG=${IMAGE}:latest
 
@@ -79,7 +76,7 @@ jobs:
         with:
           context: .
           file: ./image/${{ matrix.pt.distro }}/Dockerfile
-          platforms: linux/${{ matrix.arch }}
+          platforms: linux/arm64,linux/amd64
           build-args: |
             base_image=${{ matrix.pt.base_image }}
           tags: ${{ steps.create_tag.outputs.tags }}
