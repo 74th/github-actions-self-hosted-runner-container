@@ -5,7 +5,6 @@ on:
     branches:
       - main
 
-
 jobs:
   build:
     name: build
@@ -23,23 +22,24 @@ jobs:
         arch:
           - amd64
           - arm64
-        distro:
-          - debian
-          - ubuntu
-        include:
+        pt:
           - distro: debian
-            distro_version: bookworm-slim
+            base_image: bookworm-slim
+            image: debian
             tag: bookworm-slim
             latest: true
           - distro: debian
-            distro_version: buster-slim
+            base_image: buster-slim
+            image: debian
             tag: buster-slim
           - distro: ubuntu
-            distro_version: "24.04"
+            base_image: "24.04"
+            image: ubuntu
             tag: "24.04"
             latest: true
           - distro: ubuntu
-            distro_version: "22.04"
+            base_image: "22.04"
+            image: ubuntu
             tag: "22.04"
 
     steps:
@@ -62,12 +62,12 @@ jobs:
       - name: Create tag
         id: create_tag
         run: |-
-          IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.distro }}-${{ matrix.arch }}
-          TAG=${IMAGE}:${{ matrix.tag }}
+          IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.pt.image }}-${{ matrix.arch }}
+          TAG=${IMAGE}:${{ matrix.pt.tag }}
           LATEST_TAG=${IMAGE}:latest
 
           echo "image=${IMAGE}" >> $GITHUB_OUTPUT
-          if [ "${{ matrix.latest }}" == "true" ]; then
+          if [ "${{ matrix.pt.latest }}" == "true" ]; then
             echo "tags=${TAG},${LATEST_TAG}" >> $GITHUB_OUTPUT
           else
             echo "tags=${TAG}" >> $GITHUB_OUTPUT
@@ -78,10 +78,10 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./image/${{ matrix.distro }}/Dockerfile
+          file: ./image/${{ matrix.pt.distro }}/Dockerfile
           platforms: linux/${{ matrix.arch }}
           build-args: |
-            DISTRO_VERSION=${{ matrix.distro_version }}
+            base_image=${{ matrix.pt.base_image }}
           tags: ${{ steps.create_tag.outputs.tags }}
           push: true
 
